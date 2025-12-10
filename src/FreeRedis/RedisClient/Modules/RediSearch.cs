@@ -156,6 +156,13 @@ namespace FreeRedis
             test.Visit(exp);
             return test.Result;
         }
+
+        public static bool IsReadonlySpanOp_Implicit(this Expression exp)
+        {
+            return exp.NodeType == ExpressionType.Call &&
+                exp is MethodCallExpression exp3 &&
+                exp3.Type.Name == "ReadOnlySpan`1" && exp3.Method.Name == "op_Implicit" && exp3.Arguments.Count == 1;
+        }
     }
 
     class ReplaceVisitor : ExpressionVisitor

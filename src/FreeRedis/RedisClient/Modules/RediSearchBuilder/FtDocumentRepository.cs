@@ -467,6 +467,8 @@ namespace FreeRedis.RediSearch
                     }
                 case ExpressionType.Call:
                     var callExp = exp as MethodCallExpression;
+                    var exp3 = exp as MethodCallExpression;
+                    if (exp3.IsReadonlySpanOp_Implicit()) return ParseQueryExpression(exp3.Arguments[0], options);
                     var callType = callExp.Object?.Type ?? callExp.Method.DeclaringType;
                     var callParseResult = "";
                     switch (callType.FullName)
