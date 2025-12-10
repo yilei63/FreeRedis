@@ -49,6 +49,7 @@ namespace FreeRedis.RediSearch
                 };
                 foreach (var fieldProperty in fieldProprties)
                 {
+                    if (fieldProperty.attribute.Name == null) fieldProperty.attribute.Name = fieldProperty.property.Name;
                     var field = new DocumentSchemaFieldInfo
                     {
                         DocumentSchema = schema,
@@ -492,23 +493,19 @@ namespace FreeRedis.RediSearch
                                 case "EndsWith":
                                 case "Contains":
                                     var right = parseExp(callExp.Arguments[0]);
-                                    if (right.StartsWith("'"))
+                                    if (right.StartsWith("'") && right.EndsWith("'"))
                                     {
+                                        right = right.Trim('\'').Replace("\\'", "'").Replace("\\\\", "\\");
                                         switch (callExp.Method.Name)
                                         {
                                             case "StartsWith":
-                                            case "Contains":
-                                                right = $"'*{right.Substring(1)}";
+                                                right = $"{right}*";
                                                 break;
-                                        }
-                                    }
-                                    if (right.EndsWith("'"))
-                                    {
-                                        switch (callExp.Method.Name)
-                                        {
                                             case "EndsWith":
+                                                right = $"*{right}";
+                                                break;
                                             case "Contains":
-                                                right = $"{right.Substring(0, right.Length - 1)}*'";
+                                                right = $"*{right}*";
                                                 break;
                                         }
                                     }
@@ -677,10 +674,10 @@ namespace FreeRedis.RediSearch
                 {
                     case ExpressionType.OrElse:
                     case ExpressionType.Or:
-                        return $"({parseExp(expBinary.Left)}|{parseExp(expBinary.Right)})";
+                        return $"(({parseExp(expBinary.Left)})|({parseExp(expBinary.Right)}))";
                     case ExpressionType.AndAlso:
                     case ExpressionType.And:
-                        return $"{parseExp(expBinary.Left)} {parseExp(expBinary.Right)}";
+                        return $"({parseExp(expBinary.Left)}) ({parseExp(expBinary.Right)})";
 
                     case ExpressionType.GreaterThan:
                         return $"{parseExp(expBinary.Left)}:[({parseExp(expBinary.Right)} +inf]";

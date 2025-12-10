@@ -8,12 +8,12 @@ using Xunit;
 
 namespace FreeRedis.Tests.RedisClientTests.Other
 {
-    public class RediSearchTests : TestBase
+    public partial class RediSearchTests : TestBase
     {
 
         protected static ConnectionStringBuilder Connection = new ConnectionStringBuilder()
         {
-            Host = "8.154.26.119:63791",
+            Host = "112.124.98.208:6383",
             MaxPoolSize = 10,
             Protocol = RedisProtocol.RESP2,
             ClientName = "FreeRedis",
@@ -322,6 +322,8 @@ namespace FreeRedis.Tests.RedisClientTests.Other
         [Fact]
         public void FtCreate()
         {
+            try { cli.FtDropIndex("idx1"); }
+            catch { }
             cli.FtCreate("idx1")
                 .On(IndexDataType.Hash)
                 .Prefix("blog:post:")
@@ -332,6 +334,8 @@ namespace FreeRedis.Tests.RedisClientTests.Other
                 .AddNumericField("views")
                 .Execute();
 
+            try { cli.FtDropIndex("idx2"); }
+            catch { }
             cli.FtCreate("idx2")
                 .On(IndexDataType.Hash)
                 .Prefix("book:details:")
@@ -339,6 +343,8 @@ namespace FreeRedis.Tests.RedisClientTests.Other
                 .AddTagField("categories", separator: ";")
                 .Execute();
 
+            try { cli.FtDropIndex("idx3"); }
+            catch { }
             cli.FtCreate("idx3")
                 .On(IndexDataType.Hash)
                 .Prefix("blog:post:")
@@ -346,6 +352,8 @@ namespace FreeRedis.Tests.RedisClientTests.Other
                 .AddTagField("sku", alias: "sku_tag", sortable: true)
                 .Execute();
 
+            try { cli.FtDropIndex("idx4"); }
+            catch { }
             cli.FtCreate("idx4")
                 .On(IndexDataType.Hash)
                 .Prefix("author:details:", "book:details:")
@@ -355,6 +363,8 @@ namespace FreeRedis.Tests.RedisClientTests.Other
                 .AddTextField("name")
                 .Execute();
 
+            try { cli.FtDropIndex("idx5"); }
+            catch { }
             cli.FtCreate("idx5")
                 .On(IndexDataType.Hash)
                 .Prefix("author:details")
@@ -362,6 +372,8 @@ namespace FreeRedis.Tests.RedisClientTests.Other
                 .AddTextField("name")
                 .Execute();
 
+            try { cli.FtDropIndex("idx6"); }
+            catch { }
             cli.FtCreate("idx6")
                 .On(IndexDataType.Hash)
                 .Prefix("book:details")
@@ -369,6 +381,8 @@ namespace FreeRedis.Tests.RedisClientTests.Other
                 .AddTextField("title")
                 .Execute();
 
+            try { cli.FtDropIndex("idx7"); }
+            catch { }
             cli.FtCreate("idx7")
                 .On(IndexDataType.Json)
                 .Prefix("book:details")
@@ -385,7 +399,7 @@ namespace FreeRedis.Tests.RedisClientTests.Other
             var repo = cli.FtDocumentRepository<ContactsUserIndex>();
             //FT.SEARCH index_contacts "(@email:*wjx\\.cn*) (@companyid==10096)" dialect 4
             var rt = repo.Search(@"(@email:*wjx\.cn*) (@companyid==10096)").Dialect(4).ToList();
-
+            //FT.SEARCH index_contacts (@uemail:*wjx.cn* @companyid:[10096 10096]) LANGUAGE chinese DIALECT 4
             var rt2 = repo.Search(a => a.UEmail.Contains("wjx.cn") && a.CompanyId == 10096).Dialect(4).ToList();
         }
 
